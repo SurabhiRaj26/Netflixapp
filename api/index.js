@@ -137,17 +137,16 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Export app for Vercel
-module.exports = app;
+export default app;
 
-// Only listen if run directly (not imported)
-if (require.main === module) {
+// Only listen if run directly (not imported) - ESM check
+if (process.argv[1] === import.meta.filename) {
     initializeDatabase().then(() => {
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
     });
 } else {
-    // For Vercel, we still need to init DB but probably lazily or just call it. 
-    // Vercel serverless environment might reuse containers.
+    // For Vercel, we still need to init DB.
     initializeDatabase();
-} // redeploy trigger
+}
