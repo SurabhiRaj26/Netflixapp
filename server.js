@@ -77,7 +77,7 @@ async function initializeDatabase() {
     }
 }
 
-initializeDatabase();
+// initializeDatabase call moved to bottom conditional block
 
 // Routes
 app.post('/api/register', async (req, res) => {
@@ -136,7 +136,18 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-}); // redeploy trigger
+// Export app for Vercel
+module.exports = app;
 
+// Only listen if run directly (not imported)
+if (require.main === module) {
+    initializeDatabase().then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    });
+} else {
+    // For Vercel, we still need to init DB but probably lazily or just call it. 
+    // Vercel serverless environment might reuse containers.
+    initializeDatabase();
+} // redeploy trigger
